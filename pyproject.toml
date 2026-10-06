@@ -1,7 +1,7 @@
 [project]
 name = "agent_market_research"
-version = "0.0.0"
-description = "Agent repository: the specialist agent responsible for researching market and audience signals."
+version = "1.0.0"
+description = "Agent repository: the specialist agent responsible for market/audience research."
 requires-python = ">=3.10"
 license = { text = "Proprietary" }
 dependencies = []
@@ -19,3 +19,8 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+# Runtime dependencies are sibling child repositories (linkgen_contracts,
+# linkgen_config, agent-framework, providers/llm). They are not installable
+# from PyPI; tests resolve them through conftest.py by appending
+# ../../<child>/src to sys.path (mirroring parent compose-time resolution).

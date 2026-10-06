@@ -1,35 +1,65 @@
 # market-research
 
-Agent component of the LINKGEN content-intelligence and publishing system.
+Research-phase agent of the **LinkGen** content-intelligence and publishing
+system.
 
 ## Purpose
-Agent repository: the specialist agent responsible for researching market and audience signals.
 
-## Ownership
-Owns its implementation, local tests, local documentation, and local version
-history. Does NOT own composition, orchestration, global configuration, or
-system-wide contracts (those belong to the parent repository).
+The specialist agent responsible for market/audience research: it consumes a
+`ResearchRequest` and produces contract-conforming research artifacts —
+`ResearchReport` and `MarketSignal[]` (each signal cites a captured source).
 
-## Status
-Foundation scaffold only. Production implementation has NOT begun.
+Design highlights (see `AGENTS.md` in the parent for the master rules):
 
-## Architectural role
-Independently versioned repository composed by the parent. It must depend only
-on explicit shared contracts/interfaces (to be established in Phase 01), never
-on parent or sibling implementation code.
+- **Deterministic by construction** — ids are derived with uuid5
+  (`agent_framework.ids.deterministic_id`), time comes from the injected
+  context clock, and outputs are pure functions of the input. The same
+  request always yields byte-identical artifacts.
+- **LLM output is untrusted** — model JSON arrives router-validated and is
+  sanitized field-by-field (shared `agent_framework.sanitize` helpers) before
+  entering contract models; invented source ids are dropped, duplicate
+  signals deduped by normalized description, entries capped.
+- **Mock-first ($0 development)** — the default provider is the offline
+  deterministic `MockLLMProvider` via the `ModelRouter`. No network, no
+  credentials, no cost.
+- **No privileged tools** — no publishing/scheduling authority; publishing
+  belongs to the publishing subsystem only.
 
-## Dependency rules
-- MUST NOT import parent implementation or sibling child implementation.
-- No circular dependencies.
-- Keep provider-specific code behind provider abstractions.
+## Input / output contract
+
+Input (validated against the `ResearchRequest` contract):
+
+```json
+{"request": {"request_id": "...", "run_id": "...", "focus": "...",
+              "objectives": [], "creators": [], "domains": []}}
+```
+
+Output:
+
+```json
+{"report": {...}, "signals": [...]}
+```
+
+Fault injection (mock mode): documented prompt markers (`RATE_LIMIT`,
+`TIMEOUT`, `NETWORK_FAILURE`, `AUTH_FAILURE`, `INVALID_OUTPUT`) make failure
+paths deterministic in tests.
+
+## Dependencies
+
+Sibling child repositories (not PyPI-installable; resolved via
+`tests/conftest.py` sys.path composition):
+
+- `linkgen_contracts` — contract layer
+- `linkgen_config` — settings/modes/cost policy
+- `agent-framework` — AgentBase/AgentContext/AgentConfig + shared sanitizers
+- `providers/llm` — ModelRouter (mock provider)
 
 ## Testing
-Run local tests with:
 
     python -m pytest
 
-## Current phase
-Phase 00.5 — child repository bootstrap. No production functionality yet.
+Tests must not require network access, a paid provider, or the system clock.
 
-## Publishing authority
-No publishing/scheduling authority; publishing privilege belongs to the publishing subsystem (publisher) only.
+## Status
+
+Phase 08 — implemented (1.0.0). Original scaffold upgraded from Phase 00.5.
