@@ -58,8 +58,16 @@ Sibling child repositories (not PyPI-installable; resolved via
 
     python -m pytest
 
-Tests must not require network access, a paid provider, or the system clock.
+40 tests. Tests must not require network access, a paid provider, or the
+system clock.
 
 ## Status
 
-Phase 08 — implemented (1.0.0). Original scaffold upgraded from Phase 00.5.
+Phase 08 — implemented (1.0.0), gate-accepted. Original scaffold upgraded
+from Phase 00.5.
+
+## License
+
+Proprietary — © Entelechy Labs. All rights reserved. No license is granted
+to use, copy, modify, or distribute this software, except as agreed in
+writing with the copyright holder.
